@@ -44,12 +44,20 @@
 
 #if defined(__MBED_CMSIS_RTOS_CM)
 #include "mbed_boot.h"
+#if defined(TARGET_STM32H7)
 #include "stm32h7xx.h"
+#endif
+
+#if defined(TARGET_STM32F4)
+#include "stm32f4xx.h"
+#endif
 
 int _system_pre_init(void) {
     system_pre_init_reg_setup();
 
+    #if defined(TARGET_STM32H7)
     PWR->D3CR |= PWR_D3CR_VOSRDY;
+    #endif
 
     freertos_cmsis_rtos2_init();
     mbed_sdk_init();
