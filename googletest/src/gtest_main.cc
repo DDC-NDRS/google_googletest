@@ -60,7 +60,9 @@ int _system_pre_init(void) {
     #endif
 
     freertos_cmsis_rtos2_init();
+    #if defined(__MBED_CMSIS_RTOS_CM)
     mbed_sdk_init();
+    #endif
 
     return (1);
 }
