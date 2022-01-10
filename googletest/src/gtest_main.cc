@@ -29,26 +29,73 @@
 
 #include <cstdio>
 #include "gtest/gtest.h"
+#include "gmock/gmock.h"
 
-#if GTEST_OS_ESP8266 || GTEST_OS_ESP32
-#if GTEST_OS_ESP8266
-extern "C" {
-#endif
-void setup() {
-  testing::InitGoogleTest();
-}
-
-void loop() { RUN_ALL_TESTS(); }
-
-#if GTEST_OS_ESP8266
-}
+#if defined(__MBED_CMSIS_RTOS_CM) || defined(__FREERTOS_CMSIS_RTOS_CM)
+#include "RTOS2/FreeRTOS/Include/cmsis-freertos.h"
 #endif
 
-#else
+#include "synchapi.h"                       // Sleep
+
+/// Google C++ Testing Framework supports two families of assertions with the same interface :
+/// 
+/// ASSERT : Fails fast, aborting the current function.
+/// EXPECT : Continues after the failure.
+
+#if defined(__MBED_CMSIS_RTOS_CM)
+#include "mbed_boot.h"
+#if defined(TARGET_STM32H7)
+#include "stm32h7xx.h"
+#endif
+
+#if defined(TARGET_STM32F4)
+#include "stm32f4xx.h"
+#endif
+
+int _system_pre_init(void) {
+    system_pre_init_reg_setup();
+
+    #if defined(TARGET_STM32H7)
+    PWR->D3CR |= PWR_D3CR_VOSRDY;
+    #endif
+
+    freertos_cmsis_rtos2_init();
+    #if defined(__MBED_CMSIS_RTOS_CM)
+    mbed_sdk_init();
+    #endif
+
+    return (1);
+}
+#endif
+
+#if defined(__FREERTOS_CMSIS_RTOS_CM)
+#include "saml21_reg_stub.h"
+
+uint32_t SystemCoreClock;
+
+int _system_pre_init(void) {
+    system_pre_init_reg_setup();
+
+    freertos_cmsis_rtos2_init();
+
+    SystemCoreClock = 12000000UL;
+
+    return (1);
+}
+#endif
+
+#if defined(__MBED_CMSIS_RTOS_CM) || defined(__FREERTOS_CMSIS_RTOS_CM)
+int static low_level_inited = _system_pre_init();
+#endif
 
 GTEST_API_ int main(int argc, char **argv) {
-  printf("Running main() from %s\n", __FILE__);
-  testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
+    int rc;
+
+    printf("Running main() from %s\n", __FILE__);
+    // The following line must be executed to initialize Google Mock
+    // (and Google Test) before running the tests.
+    testing::InitGoogleMock(&argc, argv);
+
+    rc = RUN_ALL_TESTS();
+    return (rc);
 }
-#endif
