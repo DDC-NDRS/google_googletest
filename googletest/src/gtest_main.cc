@@ -69,7 +69,12 @@ int _system_pre_init(void) {
 #endif
 
 #if defined(__FREERTOS_CMSIS_RTOS_CM)
+
+#if defined(CONFIG_SOC_PART_NUMBER_SAMC21J18A)
+#include "samc21_reg_stub.h"
+#else
 #include "saml21_reg_stub.h"
+#endif
 
 uint32_t SystemCoreClock;
 
@@ -78,7 +83,11 @@ int _system_pre_init(void) {
 
     freertos_cmsis_rtos2_init();
 
+    #if defined(CONFIG_SOC_PART_NUMBER_SAMC21J18A)
+    SystemCoreClock = 48000000UL;
+    #else
     SystemCoreClock = 12000000UL;
+    #endif
 
     return (1);
 }
