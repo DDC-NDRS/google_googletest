@@ -28,12 +28,14 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <cstdio>
+
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
 #if defined(__MBED_CMSIS_RTOS_CM) || defined(__FREERTOS_CMSIS_RTOS_CM)
 #include "RTOS2/FreeRTOS/Include/cmsis-freertos.h"
 #endif
+void setup() { testing::InitGoogleTest(); }
 
 #include "synchapi.h"                       // Sleep
 
