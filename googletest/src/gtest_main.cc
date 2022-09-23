@@ -72,6 +72,10 @@ int _system_pre_init(void) {
 
 #if defined(__FREERTOS_CMSIS_RTOS_CM)
 
+#if __has_include(<zephyr/arch/arm/aarch32/cortex_m/cmsis.h>)
+#include <zephyr/arch/arm/aarch32/cortex_m/cmsis.h>
+#endif
+
 #if defined(CONFIG_SOC_PART_NUMBER_SAMC21J18A)
 #include "samc21_reg_stub.h"
 #else
